@@ -1,4 +1,4 @@
-/*jslint esnext:true, browser:true*/
+/*jshint esnext:true, browser:true*/
 /*exported App*/
 class App {
 	constructor() {
@@ -41,6 +41,10 @@ class App {
 		}
 		return this;
 	}
+	/**
+	 * Détermine le chemin actuel du script. Appelé une seule fois dans le init.
+	 * @returns App   - La classe courante
+	 */
 	static setScriptPath() {
 		this.scriptURL = document.head.lastChild.getAttribute('src');
 		this.scriptPath = document.head.lastChild.getAttribute('src').split('/').slice(0,-1);
