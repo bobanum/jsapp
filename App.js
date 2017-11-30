@@ -23,24 +23,6 @@ class App {
 		document.head.appendChild(element);
 		return this.dependencies[id];
 	}
-	static bind(element, evts) {
-		if (!evts) {
-			return this;
-		}
-		for (let k in evts) {
-			element.addEventListener(k, evts[k]);
-		}
-		return this;
-	}
-	static setAttributes(element, attributes) {
-		if (!attributes) {
-			return this;
-		}
-		for (let k in attributes) {
-			element.setAttribute(k, attributes[k]);
-		}
-		return this;
-	}
 	/**
 	 * Détermine le chemin actuel du script. Appelé une seule fois dans le init.
 	 * @returns App   - La classe courante
