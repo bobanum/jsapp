@@ -112,6 +112,17 @@ class App {
 		}
 		return resultat;
 	}
+	static creerId(prefixe, amplitude) {
+		amplitude = amplitude || 5;
+		prefixe = prefixe || "";
+		amplitude = Math.pow(10, amplitude);
+		var resultat = new Date().getTime();
+		resultat = resultat * amplitude + Math.floor(Math.random() * amplitude);
+		var alpha = "0123456789abcdefghijklmnopqrstuvwxyz";
+		resultat = resultat.toString(26).split("").map(digit=>alpha[alpha.indexOf(digit)+10]).join("");
+		resultat = prefixe + resultat;
+		return resultat;
+	}
 	static init() {
 //		var self = this;
 		this.dependencies = {};
