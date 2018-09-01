@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="docs.css" />
+	<script src="docs.js"></script>
+	<title>Théophile &vellip; Documentation</title>
+</head>
+
+<body>
+	<div class="interface">
+		<header>
+			<h1>Théophile &vellip; Documentation</h1>
+			<a href="api" target="_blank">API</a>
+		</header>
+		<footer>
+			&copy; Martin Boudreau
+		</footer>
+		<div class="body">
+			<div class="colonne">
+
+			</div>
+			<div class="contenu">
+				<ul>
+					<li>
+						<h2 id="les_fichiers">Les fichiers</h2>
+						<ul class="enum">
+							<li><a href="#">"README.md"</a> <span>&hellip;Description&hellip;</span></li>
+							<li><a href="#">"References.js"</a> <span>&hellip;Description&hellip;</span></li>
+							<li><a href="#">"Template.js"</a> <span>&hellip;Description&hellip;</span></li>
+							<li><a href="#">"Theophile.js"</a> <span>&hellip;Description&hellip;</span></li>
+							<li><a href="#">"theophile.less"</a> <span>&hellip;Description&hellip;</span></li>
+							<li><a href="#">"images"</a> <span>&hellip;Description&hellip;</span></li>
+							<li><a href="#">"App.js"</a> <span>&hellip;Description&hellip;</span></li>
+							<li><a href="#">"Diapo.js"</a> <span>&hellip;Description&hellip;</span></li>
+							<li><a href="#">"index.html"</a> <span>&hellip;Description&hellip;</span></li>
+
+						</ul>
+					</li>
+					<li>
+						<h2 id="les_classes">Les classes</h2>
+						<ul class="">
+							<li><a href="#">theophile-backdrop</a> <span>&hellip;Description&hellip;</span></li>
+							<li><a href="#">theophile-diapo</a> <span>&hellip;Description&hellip;</span></li>
+							<li><a href="#">theophile-diapo-visible</a> <span>&hellip;Description&hellip;</span></li>
+							<li><a href="#">theophile-diapo-transition</a> <span>&hellip;Description&hellip;</span></li>
+							<li><a href="#">theophile-diaporama</a> <span>&hellip;Description&hellip;</span></li>
+							<li><a href="#">theophile-reference</a> <span>&hellip;Description&hellip;</span></li>
+						</ul>
+					</li>
+					<li>
+					<hr/>
+					<hr/>
+					<hr/>
+					<hr/>
+						<h2 id="les_questions">Les questions</h2>
+						<ul class="encadres">
+							<li class="encadre">
+								<h3>Choix multiple</h3>
+								<ul>
+									<li><b>Propriétés</b>
+										<ul class="enum">
+											<li>largeur</li>
+										</ul>
+									</li>
+								</ul>
+							</li>
+							<!--
+							li.encadre>h3+p+ul>(li>b{Fichier}+span)+(li>b{Propriétés}+ul.enum>li)+(li>b{Classes et attributs utilisés}+ul.enum>li)+(li>b{Remarque}+div)+(li>b{Emmet}+div>code)
+-->
+						</ul>
+
+					</li>
+					<li>
+						<h2>Les classes et les attributs</h2>
+						<ul class="encadres">
+							<li><b><code>.qr-question</code></b> <span>Identifie la balise contenant une question.</span></li>
+						</ul>
+					</li>
+					<li>
+						<h2>Modifier les propriétés du questionnaire</h2>
+						<ul>
+							<li>
+								<h3>La version</h3>
+								<p>La propriété <code>version</code> (accessible par l'adresse) permet de mélanger les questions autrement (change le seed de base). </p>
+							</li>
+						</ul>
+					</li>
+					<li>
+						<h2>Ajouter un style à une question</h2>
+						<p>Les balises <code>style</code> placées au début d'une question s'appliqueront à cette question uniquement.</p>
+						<h3>Exemples pour gérer les solutions</h3>
+						<div class="bloccode">
+							<div>&lt;style media="print" data-contexte="#qr-mode-solutionnaire:not(:checked) ~ div.qr"&gt;</div>
+							<div>  .question &gt; div:after {</div>
+							<div>    content: none;</div>
+							<div>  }</div>
+							<div>&lt;/style&gt;</div>
+						</div>
+					</li>
+					<li>
+						<h2>Créer des clones</h2>
+						<p>Lorsqu'un élément complexe revient plusieurs fois dans la page, on peut le cloner à l'aide de l'attribut <code>data-clone</code> avec come valeur le <code>id</code> d'un élément dans un <code>div</code> vide.</p>
+						<p>Exemple : <code>&lt;div data-clone="tableauABC"&gt;&lt;/div&gt;</code></p>
+					</li>
+				</ul>
+			</div>
+
+		</div>
+	</div>
+</body>
+
+</html>

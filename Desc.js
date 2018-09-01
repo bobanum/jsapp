@@ -1,16 +1,19 @@
 /*jslint browser:true, esnext:true*/
-/*global App */
-export default class Module {
+import {Super} from "./Super.js";
+
+export class Desc extends Super {
 	constructor() {
+		super();
 	}
 	static load() {
 		return new Promise(resolve => {
+			console.log("load", this.name);
 			resolve();
 		});
 	}
 	static init () {
 		console.log("init", this.name);
-		App[this.name] = this;
+		super.init();
 	}
 }
-Module.init();
+Desc.init();

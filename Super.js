@@ -1,7 +1,9 @@
 /*jslint browser:true, esnext:true*/
-/*global App */
-export default class Module {
+import {Module} from "./Module.js";
+
+export class Super extends Module {
 	constructor() {
+		super();
 	}
 	static load() {
 		return new Promise(resolve => {
@@ -10,7 +12,7 @@ export default class Module {
 	}
 	static init () {
 		console.log("init", this.name);
-		App[this.name] = this;
+		super.init();
 	}
 }
-Module.init();
+Super.init();

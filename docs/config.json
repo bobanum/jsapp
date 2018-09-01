@@ -1,0 +1,12 @@
+{
+    "source": {
+        "include": [".."],
+        "exclude": ["../docs"]
+    },
+    "opts": {
+        "encoding": "utf8",
+        "readme": "../README.md",
+        "destination": "./api/",
+        "recurse": true
+	}
+}

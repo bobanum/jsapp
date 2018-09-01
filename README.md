@@ -1,2 +1,4 @@
 # jsapp
-Mes scripts de base pour une application Javascript
+
+Starting point for my projects using javascript, modules ans promises
+

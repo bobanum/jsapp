@@ -1,147 +1,181 @@
-/*jshint esnext:true, browser:true*/
+/*jslint browser:true, esnext:true*/
 /*exported App*/
 class App {
-	constructor() {
-	}
-	static addDependency(url, attributes) {
-		var element, id;
-		id = url.replace(/[^a-zA-Z0-9\_\-\.]/g, "_");
-		if (this.dependencies[id] !== undefined) {
-			return this.dependencies[id];
-		}
-		if (url.slice(-3) === ".js") {
-			element = document.createElement("script");
-			element.setAttribute("src", this.scriptPath + "/" + url);
-		} else if (url.slice(-4) === ".css") {
-			element = document.createElement("link");
-			element.setAttribute("href", this.scriptPath + "/" + url);
-			element.setAttribute("rel", "stylesheet");
-		}
-		element.setAttribute("id", id);
-		this.setAttributes(element, attributes);
-		this.dependencies[id] = element;
-		document.head.appendChild(element);
-		return this.dependencies[id];
-	}
-	static bind(element, evts) {
-		if (!evts) {
-			return this;
-		}
-		for (let k in evts) {
-			element.addEventListener(k, evts[k]);
-		}
-		return this;
-	}
-	static setAttributes(element, attributes) {
-		if (!attributes) {
-			return this;
-		}
-		for (let k in attributes) {
-			element.setAttribute(k, attributes[k]);
-		}
-		return this;
+	/**
+	 * Event callback called when everything is loaded : page and modules
+	 */
+	static load() {
+		console.log("load", this.name);
+		return new Promise(resolve => {
+			return resolve();
+		});
 	}
 	/**
-	 * Détermine le chemin actuel du script. Appelé une seule fois dans le init.
-	 * @returns App   - La classe courante
+	 * Returns a promise resolved when given dependency (css or js) is fully loaded
+	 * @param   {string|array} file URL to module dependancy
+	 * @returns {Promise}      A Promise object
 	 */
-	static setScriptPath() {
-		this.scriptURL = document.head.lastChild.getAttribute('src');
-		this.scriptPath = document.head.lastChild.getAttribute('src').split('/').slice(0,-1);
-		if (this.scriptPath.length === 0) {
-			this.scriptPath = ".";
+	static addDependency(dependency) {
+		if (dependency instanceof Array) {
+			return Promise.all(dependency.map(d => this.addDependency(d)));
+		} else if (dependency instanceof Promise) {
+			return dependency;
+		} else if (typeof dependency === "object") {
+			return this.addDependency(Object.values(dependency));
+		} else if (dependency.endsWith(".js")) {
+			return this.addModule(dependency);
+		} else if (dependency.endsWith(".css")) {
+			return this.addStyle(dependency);
+		}
+	}
+	/**
+	 * Returns a promise resolved when given module is fully loaded
+	 * @param   {string|array} file URL to module file
+	 * @returns {Promise}      A Promise object
+	 */
+	static addModule(file) {
+		if (file instanceof Array) {
+			return Promise.all(file.map(f => this.addModule(f)));
 		} else {
-			this.scriptPath = this.scriptPath.join("/");
+			return new Promise(resolve => {
+				var element = document.createElement("script");
+				element.setAttribute("src", this.app_path(file));
+				element.setAttribute("type", "module");
+				element.addEventListener("load", () => resolve(element));
+				document.head.appendChild(element);
+			});
 		}
-		return this;
 	}
 	/**
-	 * Retourne un objet contenant les informations et données d'une adresse 
-	 * @param   {string} url - L'adresse à analyser
-	 * @returns {object} - L'objet
+	 * Returns a promise resolved when given css is fully loaded
+	 * @param   {string|array} file URL to module file
+	 * @returns {Promise}      A Promise object
 	 */
-	static parseUrl(url) {
-		var resultat;
-		resultat = {};
-		if (url === undefined) {
-			url = window.location.href;
+	static addStyle(file) {
+		if (file instanceof Array) {
+			return Promise.all(file.map(f => this.addStyle(f)));
+		} else {
+			return new Promise(resolve => {
+				var element = document.createElement("link");
+				element.setAttribute("rel", "stylesheet");
+				element.setAttribute("href", this.app_path(file));
+				element.addEventListener("load", () => resolve(element));
+				document.head.appendChild(element);
+			});
 		}
-		try {
-			url = decodeURI(url);
-		} catch (err) {
-			url = url;
-		}
-		url = url.split("?");
-		if (url.length > 1) {
-			resultat.search = url.splice(1).join("?");
-			resultat.data = this.parseSearch(resultat.search);
-		}
-		url = url[0];
-		url = url.split("#");
-		if (url.length > 1) {
-			resultat.hash = url.splice(1).join("#");
-			resultat.refs = resultat.hash.split(',');
-		}
-		if (url[0]) {
-			resultat.href = url[0];
-		}
-		return resultat;
 	}
 	/**
-	 * Retourne un objet contenant les informations et données d'une adresse 
-	 * @param   {string} url - L'adresse à analyser
-	 * @returns {object} - L'objet
+	 * Returns a promise resolved when a json (or all jsons) is successfully loaded (and returned);
+	 * @param   {string|array} url The url to json
+	 * @returns {Promise}      A Promise object
 	 */
-	static parseSearch(urlSearch) {
-		var resultat, donnees, i, n, donnee, cle;
-		resultat = {};
-		if (urlSearch === undefined) {
-			urlSearch = window.location.search;
+	static loadJson(url) {
+		if (url instanceof Array) {
+			return Promise.all(url.map(u=>this.loadJson(u)));
+		} else {
+			return new Promise(function (resolve, reject) {
+				var xhr = new XMLHttpRequest();
+				xhr.open("get", url);
+				xhr.responseType = "json";
+				xhr.addEventListener("load", function () {
+					resolve(this.response);
+				});
+				xhr.addEventListener("error", function () {
+					reject(this);
+				});
+				xhr.send(null);
+			});
 		}
-		if (!urlSearch) {
-			return resultat;
+	}
+	/**
+	 * Returns an absolute URL to a file
+	 * @param   {string} file = ""            Relative (or already absolute) file URL
+	 * @param   {string} root = this._appPath The url on witch to base the absolute url
+	 * @returns {string} An absolute URL
+	 */
+	static absolutePath(file = "", root = this._appPath) {
+		if (file.match(/^[a-zA-Z0-9]+\:\/\//)) {
+			return file;
 		}
-		try {
-			urlSearch = decodeURI(urlSearch);
-		} catch (err) {
-			urlSearch = urlSearch;
+		if (!file) {
+			return root;
 		}
-		if (urlSearch[0] === "?") {
-			urlSearch = urlSearch.substr(1);
-		}
-		if (urlSearch.trim() === "") {
-			return resultat;
-		}
-		donnees = urlSearch.split("&");
-		for (i = 0, n = donnees.length; i < n; i += 1) {
-			donnee = donnees[i].split("=");
-			if (donnee.length === 0) {
-				continue;
-			}
-			cle = donnee.shift();
-			donnee = donnee.join("=");
-			if (resultat[cle] === undefined) {
-				resultat[cle] = donnee;
-			} else if (resultat instanceof Array) {
-				resultat[cle].push(donnee);
+		return root + "/" + file;
+	}
+	/**
+	 * Returns absolute URL to script folder
+	 * @param   {string} file Optional. A file in the App.js's folder
+	 * @returns {string} The absolute URL
+	 */
+	static app_path(file) {
+		var result = this.absolutePath(file, this._appPath);
+		return result;
+	}
+	/**
+	 * Returns absolute URL to original page folder
+	 * @param   {string} file Optional. A file in the page folder
+	 * @returns {string} The absolute URL
+	 */
+	static page_path(file) {
+		var result = this.absolutePath(file, this._pagePath);
+		return result;
+	}
+	/**
+	 * Sets static properties in reference to the page ans to the script
+	 * Is called by init
+	 */
+	static setPaths() {
+		var pageDir = window.location.href.split("/").slice(0, -1);
+		this._pagePath = pageDir.join("/");
+		var scriptDir = document.currentScript.getAttribute("src").split("/").slice(0, -1);
+		// Clean up Current = ./ or Parent = ../
+		scriptDir = scriptDir.filter(i=>i!==".");
+		var pos;
+		while (pos = scriptDir.indexOf(".."), pos >= 0) {
+			if (pos === 0) {
+				pageDir.pop();
+				scriptDir.shift();
 			} else {
-				resultat[cle] = [resultat[cle], donnee];					
+				scriptDir.splice(pos-1, 2);
 			}
 		}
-		return resultat;
+		// Absolute = http://
+		if (scriptDir.length >= 1 && scriptDir[0].match(/^[a-zA-Z0-9]+\:$/)) {
+			this._appPath = scriptDir.join("/");
+			return;
+		}
+		// Protocole relative = //
+		if (scriptDir.length >= 2 && scriptDir[0] === "" && scriptDir[1] === "") {
+			this._appPath = pageDir.slice(0,2).concat(scriptDir.slice(2)).join("/");
+			return;
+		}
+		// Domain relative = /
+		if (scriptDir.length >= 1 && scriptDir[0] === "") {
+			this._appPath = pageDir.slice(0,3).concat(scriptDir.slice(1)).join("/");
+			return;
+		}
+		// Page relative
+		this._appPath = pageDir.concat(scriptDir).join("/");
 	}
 	static init() {
-//		var self = this;
-		this.dependencies = {};
-		this.setScriptPath();
-		var data=this.parseUrl(this.scriptURL).data;
-		for (let k in data) {
-			this.addDependency(k + ".js");
-		}
-		this.evt = {
-
-		};
-		window.addEventListener("load", function () {
+		console.log("init", this.name);
+		this.setPaths();
+		this.loadJson("config.json").then((data) => {
+			console.log(data);
+			return Promise.all([
+				new Promise(resolve => {
+					window.addEventListener("load", () => resolve());
+				}),
+				this.addDependency(["appjs.css", "Desc.js"]),
+			]);
+		}).then(data => {
+			console.log("Everything loaded", data);
+			return Promise.all([
+				this.load(),
+				this.Desc.load(),
+			]);
+		}).then(() => {
+			console.log("finished");
 		});
 	}
 }
