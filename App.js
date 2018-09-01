@@ -1,8 +1,11 @@
 /*jslint browser:true, esnext:true*/
-/*exported App*/
+/**
+ * Main (and only) script to be loaded by the page. Manages all the dependencies.
+ */
 class App {
 	/**
 	 * Event callback called when everything is loaded : page and modules
+	 * @returns {Promise} The Promise
 	 */
 	static load() {
 		console.log("load", this.name);
@@ -89,8 +92,8 @@ class App {
 	}
 	/**
 	 * Returns an absolute URL to a file
-	 * @param   {string} file = ""            Relative (or already absolute) file URL
-	 * @param   {string} root = this._appPath The url on witch to base the absolute url
+	 * @param   {string} file Relative (or already absolute) file URL
+	 * @param   {string} root The url on witch to base the absolute url
 	 * @returns {string} An absolute URL
 	 */
 	static absolutePath(file = "", root = this._appPath) {
@@ -157,6 +160,9 @@ class App {
 		// Page relative
 		this._appPath = pageDir.concat(scriptDir).join("/");
 	}
+	/**
+	 * Sets static properties and manages onload events
+	 */
 	static init() {
 		console.log("init", this.name);
 		this.setPaths();
@@ -166,16 +172,16 @@ class App {
 				new Promise(resolve => {
 					window.addEventListener("load", () => resolve());
 				}),
-				this.addDependency(["appjs.css", "Desc.js"]),
+				this.addDependency(["appjs.css", "Child.js"]),
 			]);
 		}).then(data => {
 			console.log("Everything loaded", data);
 			return Promise.all([
 				this.load(),
-				this.Desc.load(),
+				this.Child.load(),
 			]);
 		}).then(() => {
-			console.log("finished");
+			console.log("Finished");
 		});
 	}
 }
